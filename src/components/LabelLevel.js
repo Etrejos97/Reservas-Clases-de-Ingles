@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { colors, spacing } from '../theme';
 
 export default function LabelLevel({ level }) {
   return (
@@ -11,12 +12,10 @@ export default function LabelLevel({ level }) {
 
 const styles = StyleSheet.create({
   container: {
+    alignSelf: 'auto',
     paddingVertical: 3,
-    paddingHorizontal: 10,
-    borderRadius: full,
+    paddingHorizontal: spacing.md,
     borderWidth: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
   },
   text: {
     fontSize: 11,
