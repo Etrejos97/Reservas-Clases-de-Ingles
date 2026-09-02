@@ -33,7 +33,7 @@ export const radius = {
 };
  
 export const typography = {
-  titulo: { fontSize: 26, fontWeight: '800', color: colors.texto },
+  titulo: { fontSize: 20, fontWeight: '800', color: colors.texto },
   subtitulo: { fontSize: 18, fontWeight: '700', color: colors.texto },
   cuerpo: { fontSize: 15, color: colors.texto },
   secundario: { fontSize: 13, color: colors.textoSuave },
@@ -58,4 +58,4 @@ export const coloresPorNivel = {
   Conversacional: '#7C3AED',
 };
  
-export default { colors, spacing, radius, typography, sombra, coloresPorNivel }
+export default { colors, spacing, radius, typography, sombra, coloresPorNivel };
