@@ -1,16 +1,30 @@
-import React, {useState, useEffect} from "react";
+import React, {useState, useMemo} from "react";
 import { View, Text, StyleSheet, Pressable, Image, TextInput, ScrollView } from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';;
 import {Ionicons} from '@expo/vector-icons';
 import LabelLevel from "../components/LabelLevel";
+import Card from "../components/Card.js";
 import LevelChip  from "../components/LevelChip";
+import useResponsive from "../hooks/useResponsive.js";
 import { colors, spacing, radius, typography } from '../theme/index.js';
 import {formatearPrecio, CLASES, NIVELES} from '../data/clases';
+import { FlatList } from "react-native/types_generated/index";
 
 export default function ClasesScreen({navigation}) {
     const insets = useSafeAreaInsets();
+    const [columnas, paddingHorizontal] = useResponsive();
     const [nivel, setNivel] = useState();
     const[busqueda, setBusqueda] = useState('');
+    const resultados = useMemo(() => {
+        const textoBusqueda = busqueda.trim().toLowerCase()
+    return CLASES.filter((clase) => {
+        const coincidenciaNivel = nivel === 'Todos' || clase.nivel === nivel;
+        const coincidenciaTexto = textoBusqueda || 
+        clase.titulo.toLowerCase().includes(textoBusqueda) ||
+        clase.profesor.nombre.toLowerCase().includes(textoBusqueda);
+        return coincidenciaNivel && coincidenciaTexto
+    })
+}, [nivel, busqueda]);
 
     return(
         <View style={[style.pantalla, { paddingTop: insets.top + spacing.md}]}>            
@@ -52,6 +66,20 @@ export default function ClasesScreen({navigation}) {
                     ))
                 }
             </ScrollView>
+            <FlatList
+                data={resultados}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => (
+                    <Card clase={item} 
+                        onPress = {() => navigation.navigate('DetalleClaseScreen', {clase: item})}
+                    />
+                )}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{
+                    paddingHorizontal,
+                    flexGrow: 1,
+                }}
+            />
         </View>
     )
 }

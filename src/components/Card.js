@@ -4,7 +4,7 @@ import LabelLevel from "./LabelLevel";
 import { colors, spacing, radius, typography } from '../theme';
 import {formatearPrecio, CLASES} from '../data/clases';
 
-export default function Card({clase, onPress, ancho}){
+export default function Card({clase, onPress}){
     return (
         <Pressable
             onPress={onPress}>
