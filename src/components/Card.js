@@ -12,9 +12,9 @@ export default function Card({clase, onPress}){
             <View>
                 <LabelLevel level={clase.nivel} />
             </View>
-            <text style={estilos.titulo} numberOfLines={2}>
+            <Text style={estilos.titulo} numberOfLines={2}>
                 {clase.titulo}
-            </text>
+            </Text>
             <View>
                 <Text style={estilos.profesor}>
                     {clase.profesor.nombre}
@@ -32,7 +32,7 @@ export default function Card({clase, onPress}){
     )
 }
 
-const style = StyleSheet.create({
+const estilos = StyleSheet.create({
   tarjeta: {
     backgroundColor: colors.superficie,
     borderRadius: radius.lg,

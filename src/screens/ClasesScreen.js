@@ -1,20 +1,23 @@
 import React, {useState, useMemo} from "react";
-import { View, Text, StyleSheet, Pressable, Image, TextInput, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Image, TextInput, ScrollView, FlatList } from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';;
 import {Ionicons} from '@expo/vector-icons';
 import LabelLevel from "../components/LabelLevel";
 import Card from "../components/Card.js";
 import LevelChip  from "../components/LevelChip";
+import EstadoVacio from "../components/EstadoVacio.js";
 import useResponsive from "../hooks/useResponsive.js";
+
 import { colors, spacing, radius, typography } from '../theme/index.js';
 import {formatearPrecio, CLASES, NIVELES} from '../data/clases';
-import { FlatList } from "react-native/types_generated/index";
 
 export default function ClasesScreen({navigation}) {
     const insets = useSafeAreaInsets();
-    const [columnas, paddingHorizontal] = useResponsive();
+    const {columnas, paddingHorizontal} = useResponsive();
+
     const [nivel, setNivel] = useState();
     const[busqueda, setBusqueda] = useState('');
+
     const resultados = useMemo(() => {
         const textoBusqueda = busqueda.trim().toLowerCase()
     return CLASES.filter((clase) => {
@@ -71,7 +74,7 @@ export default function ClasesScreen({navigation}) {
                 keyExtractor={(item) => item.id}
                 renderItem={({ item }) => (
                     <Card clase={item} 
-                        onPress = {() => navigation.navigate('DetalleClaseScreen', {clase: item})}
+                        onPress = {() => navigation.navigate('DetalleClase', {clase: item})}
                     />
                 )}
                 showsVerticalScrollIndicator={false}
@@ -79,6 +82,19 @@ export default function ClasesScreen({navigation}) {
                     paddingHorizontal,
                     flexGrow: 1,
                 }}
+                numColumns={columnas}
+                listEmptyComponent={
+                    <EstadoVacio
+                        icono="search-outline"
+                        titulo="No encontramos resultados"
+                        mensaje="La combinación de búsqueda no arrojó resultados."
+                        onAccion={() => {
+                            setBusqueda('');
+                            setNivel('Todos');
+                        }
+                    }
+                    />
+                }
             />
         </View>
     )
