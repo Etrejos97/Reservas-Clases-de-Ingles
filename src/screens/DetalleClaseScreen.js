@@ -11,6 +11,21 @@ export default function DetalleClase({ route, navigation }) {
     const insets = useSafeAreaInsets();
     const { clase } = route.params;
     const { paddingHorizontal, isTablet } = useResponsive();
+    const [cuposDisponibles, setCuposDisponibles] = useState(clase.cupos);
+
+    function manejarReserva() {
+        Alert.alert(
+            'Confirmar reserva',
+            `¿Deseas reservar "${clase.titulo}"?`,
+            [
+                { text: 'Rechazar', style: 'cancel' },
+                {
+                    text: 'Aceptar',
+                    onPress: () => setCuposDisponibles((actuales) => actuales - 1),
+                },
+            ]
+        );
+    }
 
     return (
         <View style={estilos.pantalla}>
@@ -44,15 +59,23 @@ export default function DetalleClase({ route, navigation }) {
                             <Text key={horario} style={estilos.descripcion}>{horario}</Text>
                         ))}
                     </View>
-                    <Text style={estilos.descripcion}>{`${clase.cupos} cupos disponibles`}</Text>
+                    <Text style={estilos.descripcion}>{`${cuposDisponibles} cupos disponibles`}</Text>
                 </View>
             </ScrollView>
             <View style={[estilos.barra, { paddingHorizontal }]}>
                 <Text style={estilos.precio}>{formatearPrecio(clase.precio)}</Text>
                 <Pressable
-                    style={({ pressed }) => [estilos.boton, pressed && { opacity: 0.7 }]}
+                    disabled={cuposDisponibles <= 0}
+                    onPress={manejarReserva}
+                    style={({ pressed }) => [
+                        estilos.boton,
+                        cuposDisponibles <= 0 && estilos.botonDeshabilitado,
+                        pressed && { opacity: 0.7 },
+                    ]}
                 >
-                    <Text style={estilos.botonTexto}>Reservar clase</Text>
+                    <Text style={estilos.botonTexto}>
+                        {cuposDisponibles <= 0 ? 'Sin cupos' : 'Reservar clase'}
+                    </Text>
                 </Pressable>
             </View>
         </View>
@@ -109,6 +132,6 @@ const estilos = StyleSheet.create({
         fontSize: 15,
         fontWeight: '700',
     },
-
+    botonDeshabilitado: { backgroundColor: colors.borde },
 
 });
