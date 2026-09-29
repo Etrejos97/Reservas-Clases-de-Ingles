@@ -1,6 +1,6 @@
 import react from 'react';
 import {View, Text, StyleSheet} from 'react-native';
-import {ionicons} from '@expo/vector-icons';
+import {Ionicons} from '@expo/vector-icons';
 import {colors, spacing} from '../theme/index.js';
 
 export default function EstadoVacio({titulo, mensaje, icono='calendar-outline', onAccion}) {

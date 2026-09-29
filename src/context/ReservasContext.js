@@ -25,4 +25,39 @@ export function ReservasProvider({children}) {
         }
         cargar();
 },[])
+
+    // Guardar reservas en AsyncStorage
+    useEffect(() => {
+        if (!cargando) {
+            AsyncStorage.setItem(CLAVE_RESERVAS, JSON.stringify(reservas)).catch((error) => {
+                console.log('Error guardando reservas: ', error);
+            });
+        }
+    },[reservas,cargando]);
+
+    const agregarReserva = useCallback((clase, horario) => {
+        const nueva = {
+            id: clase.id + '-' + horario,
+            titulo: clase.titulo,
+            nivel: clase.nivel,
+            profesor: clase.profesor.nombre,
+            precio: clase.precio,
+            horario,
+            createdAt: new Date().toISOString(),
+        }
+        let resultado = {ok: true};
+        setReservas((previas) => {
+            if (previas.some((r) => r.id === nueva.id)) {
+                resultado = {ok: false};
+                return previas;
+            }
+            return [nueva, ...previas];
+        });
+        return resultado;
+    },[]);
+    const valor = useMemo(
+        () =>(
+            {cargando, reservas, agregarReserva}),[cargando, reservas, agregarReserva]
+        );
+    return <ReservasContext.Provider>{children}</ReservasContext.Provider>
 }

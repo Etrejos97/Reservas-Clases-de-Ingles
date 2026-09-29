@@ -5,7 +5,7 @@ import { colors, spacing, radius } from '../theme';
 export default function LevelChip({label, active, onPress}) {
     return (
         <Pressable onPress={onPress}
-            style={( pressed ) => [
+            style={( {pressed} ) => [
                 style.chip,
                 active && style.chipActivo,
                 pressed && { opacity: 0.7 },

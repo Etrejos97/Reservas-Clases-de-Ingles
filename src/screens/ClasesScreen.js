@@ -15,14 +15,14 @@ export default function ClasesScreen({navigation}) {
     const insets = useSafeAreaInsets();
     const {columnas, paddingHorizontal} = useResponsive();
 
-    const [nivel, setNivel] = useState();
+    const [nivel, setNivel] = useState('Todos');
     const[busqueda, setBusqueda] = useState('');
 
     const resultados = useMemo(() => {
         const textoBusqueda = busqueda.trim().toLowerCase()
     return CLASES.filter((clase) => {
         const coincidenciaNivel = nivel === 'Todos' || clase.nivel === nivel;
-        const coincidenciaTexto = textoBusqueda || 
+        const coincidenciaTexto = !textoBusqueda || 
         clase.titulo.toLowerCase().includes(textoBusqueda) ||
         clase.profesor.nombre.toLowerCase().includes(textoBusqueda);
         return coincidenciaNivel && coincidenciaTexto
@@ -63,7 +63,7 @@ export default function ClasesScreen({navigation}) {
                         <LevelChip
                             key={item}
                             label={item}
-                            active={item}
+                            active={nivel === item}
                             onPress={() => setNivel(item)}
                         />
                     ))
@@ -83,7 +83,7 @@ export default function ClasesScreen({navigation}) {
                     flexGrow: 1,
                 }}
                 numColumns={columnas}
-                listEmptyComponent={
+                ListEmptyComponent={
                     <EstadoVacio
                         icono="search-outline"
                         titulo="No encontramos resultados"
