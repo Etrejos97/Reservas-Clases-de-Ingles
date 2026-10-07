@@ -12,13 +12,13 @@ export default function DetalleClase({ route, navigation }) {
     const insets = useSafeAreaInsets();
     const { clase } = route.params;
     const { paddingHorizontal, isTablet } = useResponsive();
-    const { reservas, agregarReserva } = useReserva();
+    const { cargando, reservas, agregarReserva } = useReserva();
     const [horarioElegido, setHorarioElegido] = useState(null);
 
     const reservasDeLaClase = reservas.filter((r) => r.id.startsWith(clase.id + '-'));
     const cuposDisponibles = clase.cupos - reservasDeLaClase.length;
     const horariosReservados = reservasDeLaClase.map((r) => r.horario);
-    const puedeReservar = cuposDisponibles > 0 && horarioElegido !== null;
+    const puedeReservar = !cargando && cuposDisponibles > 0 && horarioElegido !== null;
 
 
     function manejarReserva() {

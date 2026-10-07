@@ -1,35 +1,44 @@
-import { useState, useEffect, useCallback } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { getData, saveData } from '../services/storage';
 
 export default function useAlmacenamiento(key, valorInicial) {
     const [valor, setValor] = useState(valorInicial);
     const [listo, setListo] = useState(false);
+    const ultimoGuardado = useRef(valorInicial); // Lo último que sí quedó guardado en el teléfono
 
     useEffect(() => {
         let activo = true; // Variable para controlar si el componente sigue montado
 
-        AsyncStorage.getItem(key)
-            .then((guardando) => {
-                if (activo && guardando !== null) {
-                    setValor(JSON.parse(guardando));
+        const cargar = async () => {
+            const guardado = await getData(key);
+            if (activo) {
+                if (guardado !== null) {
+                    setValor(guardado);
+                    ultimoGuardado.current = guardado;
                 }
-            })
-            .catch((error) => console.error('Error leyendo ' + key, error))
-            .finally(() => activo && setListo(true));
+                setListo(true);
+            }
+        };
+        cargar();
 
         return () => {
             activo = false; // Marcar como inactivo al desmontar el componente
         }
     }, [key]);
 
+    // Actualiza lo que se ve en pantalla y lo que queda guardado
     const actualizar = useCallback(
-        async(nuevoValor) => {
+        async (nuevoValor) => {
             setValor(nuevoValor);
-            try {
-                await AsyncStorage.setItem(key, JSON.stringify(nuevoValor));
-            } catch (error) {
-                console.log('Error guardando ' + key, error);
+            const guardado = await saveData(key, nuevoValor);
+            if (guardado) {
+                ultimoGuardado.current = nuevoValor;
+            } else {
+                // Si no se pudo guardar, la pantalla vuelve a lo que sí está guardado
+                setValor(ultimoGuardado.current);
             }
         }, [key]
     );
-};
+
+    return [valor, actualizar, listo];
+}

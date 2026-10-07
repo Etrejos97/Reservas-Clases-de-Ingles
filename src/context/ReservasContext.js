@@ -1,39 +1,14 @@
-import React, {useState, useEffect, useCallback, useMemo, createContext} from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, {useCallback, useMemo, createContext} from 'react';
+import useAlmacenamiento from '../hooks/useAlmacenamiento';
 
 const CLAVE_RESERVAS = '@reserva_ingles';
 
 export const ReservasContext = createContext(null);
 
 export function ReservasProvider({children}) {
-    const [reservas, setReservas] = useState([]);
-    const [cargando, setCargando] = useState(true);
-
-    // Cargar reservas que tengo guardadas, si no tengo ninguna, entonces se inicializa con un array vacío
-    useEffect(() => {
-        const cargar = async () => {
-            try {
-                const guardado = await AsyncStorage.getItem(CLAVE_RESERVAS);
-                if (guardado) {
-                    setReservas(JSON.parse(guardado));
-                }
-            } catch (error) {
-                console.log('Error leyendo reservas: ', error);
-            }finally{
-                setCargando(false);
-            }
-        }
-        cargar();
-},[])
-
-    // Guardar reservas en AsyncStorage
-    useEffect(() => {
-        if (!cargando) {
-            AsyncStorage.setItem(CLAVE_RESERVAS, JSON.stringify(reservas)).catch((error) => {
-                console.log('Error guardando reservas: ', error);
-            });
-        }
-    },[reservas,cargando]);
+    // El hook se encarga de leer y guardar las reservas, si no hay ninguna empieza con un array vacío
+    const [reservas, setReservas, listo] = useAlmacenamiento(CLAVE_RESERVAS, []);
+    const cargando = !listo;
 
     const agregarReserva = useCallback((clase, horario) => {
         const id = clase.id + '-' + horario;
@@ -49,9 +24,9 @@ export function ReservasProvider({children}) {
             horario,
             createdAt: new Date().toISOString(),
         };
-        setReservas((previas) => [nueva, ...previas]);
+        setReservas([nueva, ...reservas]);
         return {ok: true};
-    },[reservas]);
+    },[reservas, setReservas]);
     const valor = useMemo(
         () =>(
             {cargando, reservas, agregarReserva}),[cargando, reservas, agregarReserva]
