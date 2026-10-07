@@ -1,15 +1,14 @@
 import React, {useState, useMemo} from "react";
-import { View, Text, StyleSheet, Pressable, Image, TextInput, ScrollView, FlatList } from 'react-native';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';;
+import { View, Text, StyleSheet, TextInput, ScrollView, FlatList } from 'react-native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Ionicons} from '@expo/vector-icons';
-import LabelLevel from "../components/LabelLevel";
 import Card from "../components/Card.js";
 import LevelChip  from "../components/LevelChip";
 import EstadoVacio from "../components/EstadoVacio.js";
 import useResponsive from "../hooks/useResponsive.js";
 
 import { colors, spacing, radius, typography } from '../theme/index.js';
-import {formatearPrecio, CLASES, NIVELES} from '../data/clases';
+import {CLASES, NIVELES} from '../data/clases';
 
 export default function ClasesScreen({navigation}) {
     const insets = useSafeAreaInsets();
@@ -38,7 +37,7 @@ export default function ClasesScreen({navigation}) {
                 <Ionicons name="search" size={18} color={colors.textoSuave} />
                 <TextInput
                     style={style.input}
-                    placeholder="Buscar por nivel"
+                    placeholder="Buscar por título o profesor"
                     value={busqueda}
                     onChangeText={setBusqueda}
                     autoCorrect={false}
