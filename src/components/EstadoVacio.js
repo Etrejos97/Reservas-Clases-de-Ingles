@@ -1,9 +1,9 @@
 import react from 'react';
-import {View, Text, StyleSheet} from 'react-native';
+import {View, Text, StyleSheet, Pressable} from 'react-native';
 import {Ionicons} from '@expo/vector-icons';
-import {colors, spacing} from '../theme/index.js';
+import {colors, spacing, radius} from '../theme/index.js';
 
-export default function EstadoVacio({titulo, mensaje, icono='calendar-outline', onAccion}) {
+export default function EstadoVacio({titulo, mensaje, icono='calendar-outline', onAccion, textoAccion='Limpiar filtros'}) {
     return (
         <View style={styles.contenedor}>
             <View style={styles.circulo}>
@@ -11,6 +11,15 @@ export default function EstadoVacio({titulo, mensaje, icono='calendar-outline', 
             </View>
             <Text style={styles.titulo}>{titulo}</Text>
             <Text style={styles.mensaje}>{mensaje}</Text>
+            {onAccion && (
+                <Pressable
+                    onPress={onAccion}
+                    style={({pressed}) => [styles.boton, pressed && {opacity: 0.7}]}
+                >
+                    <Text style={styles.botonTexto}>{textoAccion}</Text>
+                </Pressable>
+            )}
+
         </View>
     );
 }
@@ -39,4 +48,13 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
     lineHeight: 20,
   },
+    boton: {
+    marginTop: spacing.lg,
+    backgroundColor: colors.primario,
+    borderRadius: radius.md,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xl,
+  },
+  botonTexto: { color: '#FFFFFF', fontSize: 15, fontWeight: '700' },
+
 });

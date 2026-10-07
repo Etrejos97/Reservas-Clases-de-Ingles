@@ -5,27 +5,44 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useResponsive from "../hooks/useResponsive";
 import { colors, spacing, radius, typography, sombra } from '../theme/index.js';
 import { formatearPrecio } from '../data/clases';
+import useReserva from '../hooks/useReserva';
 import LabelLevel from "../components/LabelLevel";
 
 export default function DetalleClase({ route, navigation }) {
     const insets = useSafeAreaInsets();
     const { clase } = route.params;
     const { paddingHorizontal, isTablet } = useResponsive();
-    const [cuposDisponibles, setCuposDisponibles] = useState(clase.cupos);
+    const { reservas, agregarReserva } = useReserva();
+    const [horarioElegido, setHorarioElegido] = useState(null);
+
+    const reservasDeLaClase = reservas.filter((r) => r.id.startsWith(clase.id + '-'));
+    const cuposDisponibles = clase.cupos - reservasDeLaClase.length;
+    const horariosReservados = reservasDeLaClase.map((r) => r.horario);
+    const puedeReservar = cuposDisponibles > 0 && horarioElegido !== null;
+
 
     function manejarReserva() {
         Alert.alert(
             'Confirmar reserva',
-            `¿Deseas reservar "${clase.titulo}"?`,
+            `¿Deseas reservar "${clase.titulo}" el ${horarioElegido}?`,
             [
                 { text: 'Rechazar', style: 'cancel' },
                 {
                     text: 'Aceptar',
-                    onPress: () => setCuposDisponibles((actuales) => actuales - 1),
+                    onPress: () => {
+                        const resultado = agregarReserva(clase, horarioElegido);
+                        if (resultado.ok) {
+                            setHorarioElegido(null);
+                            Alert.alert('Reserva confirmada', 'Te esperamos en la clase.');
+                        } else {
+                            Alert.alert('Ya reservada', 'Ya tienes reservado ese horario.');
+                        }
+                    },
                 },
             ]
         );
     }
+
 
     return (
         <View style={estilos.pantalla}>
@@ -55,28 +72,53 @@ export default function DetalleClase({ route, navigation }) {
                     </View>
                     <View>
                         <Text style={typography.subtitulo}>Horarios disponibles</Text>
-                        {clase.horarios.map((horario) => (
-                            <Text key={horario} style={estilos.descripcion}>{horario}</Text>
-                        ))}
+                        <View style={estilos.horarios}>
+                            {clase.horarios.map((horario) => {
+                                const reservado = horariosReservados.includes(horario);
+                                const activo = horarioElegido === horario;
+                                return (
+                                    <Pressable
+                                        key={horario}
+                                        disabled={reservado}
+                                        onPress={() => setHorarioElegido(horario)}
+                                        style={[
+                                            estilos.horario,
+                                            activo && estilos.horarioActivo,
+                                            reservado && estilos.horarioReservado,
+                                        ]}
+                                    >
+                                        <Text style={[estilos.horarioTexto, activo && estilos.horarioTextoActivo]}>
+                                            {reservado ? `${horario} · Reservado` : horario}
+                                        </Text>
+                                    </Pressable>
+                                );
+                            })}
+                        </View>
                     </View>
+
                     <Text style={estilos.descripcion}>{`${cuposDisponibles} cupos disponibles`}</Text>
                 </View>
             </ScrollView>
             <View style={[estilos.barra, { paddingHorizontal }]}>
                 <Text style={estilos.precio}>{formatearPrecio(clase.precio)}</Text>
                 <Pressable
-                    disabled={cuposDisponibles <= 0}
+                    disabled={!puedeReservar}
                     onPress={manejarReserva}
                     style={({ pressed }) => [
                         estilos.boton,
-                        cuposDisponibles <= 0 && estilos.botonDeshabilitado,
+                        !puedeReservar && estilos.botonDeshabilitado,
                         pressed && { opacity: 0.7 },
                     ]}
-                >
+                    >
                     <Text style={estilos.botonTexto}>
-                        {cuposDisponibles <= 0 ? 'Sin cupos' : 'Reservar clase'}
+                        {cuposDisponibles <= 0
+                            ? 'Sin cupos'
+                            : horarioElegido === null
+                                ? 'Elige un horario'
+                                : 'Reservar clase'}
                     </Text>
                 </Pressable>
+
             </View>
         </View>
     )
@@ -133,5 +175,18 @@ const estilos = StyleSheet.create({
         fontWeight: '700',
     },
     botonDeshabilitado: { backgroundColor: colors.borde },
+        horarios: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.sm },
+    horario: {
+        paddingVertical: spacing.sm,
+        paddingHorizontal: spacing.lg,
+        borderRadius: radius.full,
+        backgroundColor: colors.superficie,
+        borderWidth: 1,
+        borderColor: colors.borde,
+    },
+    horarioActivo: { backgroundColor: colors.primario, borderColor: colors.primario },
+    horarioReservado: { opacity: 0.5 },
+    horarioTexto: { fontSize: 13, fontWeight: '600', color: colors.textoSuave },
+    horarioTextoActivo: { color: '#FFFFFF' },
 
 });

@@ -36,28 +36,26 @@ export function ReservasProvider({children}) {
     },[reservas,cargando]);
 
     const agregarReserva = useCallback((clase, horario) => {
+        const id = clase.id + '-' + horario;
+        if (reservas.some((r) => r.id === id)) {
+            return {ok: false};
+        }
         const nueva = {
-            id: clase.id + '-' + horario,
+            id,
             titulo: clase.titulo,
             nivel: clase.nivel,
             profesor: clase.profesor.nombre,
             precio: clase.precio,
             horario,
             createdAt: new Date().toISOString(),
-        }
-        let resultado = {ok: true};
-        setReservas((previas) => {
-            if (previas.some((r) => r.id === nueva.id)) {
-                resultado = {ok: false};
-                return previas;
-            }
-            return [nueva, ...previas];
-        });
-        return resultado;
-    },[]);
+        };
+        setReservas((previas) => [nueva, ...previas]);
+        return {ok: true};
+    },[reservas]);
     const valor = useMemo(
         () =>(
             {cargando, reservas, agregarReserva}),[cargando, reservas, agregarReserva]
         );
-    return <ReservasContext.Provider>{children}</ReservasContext.Provider>
+    return <ReservasContext.Provider value={valor}>{children}</ReservasContext.Provider>
+
 }

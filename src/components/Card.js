@@ -1,33 +1,33 @@
 import React from "react";
 import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
 import LabelLevel from "./LabelLevel";
-import { colors, spacing, radius, typography } from '../theme';
-import {formatearPrecio, CLASES} from '../data/clases';
+import { colors, spacing, radius } from '../theme';
+import { formatearPrecio } from '../data/clases';
 
-export default function Card({clase, onPress}){
+export default function Card({ clase, onPress }) {
     return (
         <Pressable
-            onPress={onPress}>
-            <Image source={{ uri: clase.imagen }}/>
-            <View>
+            onPress={onPress}
+            style={({ pressed }) => [estilos.tarjeta, pressed && { opacity: 0.85 }]}
+        >
+            <Image source={{ uri: clase.imagen }} style={estilos.imagen} />
+            <View style={estilos.cuerpo}>
                 <LabelLevel level={clase.nivel} />
-            </View>
-            <Text style={estilos.titulo} numberOfLines={2}>
-                {clase.titulo}
-            </Text>
-            <View>
+                <Text style={estilos.titulo} numberOfLines={2}>
+                    {clase.titulo}
+                </Text>
                 <Text style={estilos.profesor}>
                     {clase.profesor.nombre}
                 </Text>
-                <Text style={estilos.horario}>
-                    {clase.horarios[0]}
-                </Text>
-                <Text style={estilos.precio}> 
-                    {formatearPrecio(clase.precio)}
-                </Text>
+                <View style={estilos.pie}>
+                    <Text style={estilos.meta}>
+                        {clase.horarios[0]}
+                    </Text>
+                    <Text style={estilos.precio}>
+                        {formatearPrecio(clase.precio)}
+                    </Text>
+                </View>
             </View>
-
-
         </Pressable>
     )
 }
@@ -36,6 +36,8 @@ const estilos = StyleSheet.create({
   tarjeta: {
     backgroundColor: colors.superficie,
     borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.borde,
     overflow: 'hidden',
     marginBottom: spacing.lg,
   },
@@ -49,17 +51,13 @@ const estilos = StyleSheet.create({
     gap: spacing.sm,
   },
   titulo: { fontSize: 16, fontWeight: '700', color: colors.texto },
-  filaProfesor: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  avatar: { width: 24, height: 24, borderRadius: 12, backgroundColor: colors.borde },
-  profesor: { fontSize: 13, color: colors.textoSuave, flexShrink: 1 },
+  profesor: { fontSize: 13, color: colors.textoSuave },
   pie: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginTop: spacing.xs,
   },
-  filaCentro: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   meta: { fontSize: 12, color: colors.textoSuave },
-  punto: { color: colors.borde, marginHorizontal: 2 },
   precio: { fontSize: 14, fontWeight: '800', color: colors.primario },
 });
