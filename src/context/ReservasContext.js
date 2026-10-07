@@ -1,13 +1,12 @@
 import React, {useCallback, useMemo, createContext} from 'react';
 import useAlmacenamiento from '../hooks/useAlmacenamiento';
-
-const CLAVE_RESERVAS = '@reserva_ingles';
+import { STORAGE_KEYS } from '../constants/storageKeys';
 
 export const ReservasContext = createContext(null);
 
 export function ReservasProvider({children}) {
     // El hook se encarga de leer y guardar las reservas, si no hay ninguna empieza con un array vacío
-    const [reservas, setReservas, listo] = useAlmacenamiento(CLAVE_RESERVAS, []);
+    const [reservas, setReservas, listo] = useAlmacenamiento(STORAGE_KEYS.RESERVAS, []);
     const cargando = !listo;
 
     const agregarReserva = useCallback((clase, horario) => {
