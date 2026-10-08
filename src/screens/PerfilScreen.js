@@ -4,6 +4,8 @@ import {
     KeyboardAvoidingView, Platform, Alert, StyleSheet,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
+import AvatarPerfil from '../components/AvatarPerfil';
 import LevelChip from '../components/LevelChip';
 import usePerfil from '../hooks/usePerfil';
 import { errorDePerfil } from '../utils/validarPerfil';
@@ -17,6 +19,25 @@ function FormularioPerfil({ perfil, onTerminar }) {
     const [nivel, setNivel] = useState(perfil ? perfil.nivelIngles : '');
     const [telefono, setTelefono] = useState(perfil ? perfil.telefono : '');
     const [documento, setDocumento] = useState(perfil ? perfil.documento : '');
+    const [foto, setFoto] = useState((perfil && perfil.foto) || '');
+
+    async function elegirFoto() {
+        try {
+            const resultado = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ['images'],
+                allowsEditing: true,
+                aspect: [1, 1],
+                quality: 0.7,
+            });
+            // Si la persona cierra la galería sin elegir, no cambio la foto
+            if (resultado.canceled) {
+                return;
+            }
+            setFoto(resultado.assets[0].uri);
+        } catch (error) {
+            Alert.alert('No se pudo abrir la galería', 'Intenta de nuevo.');
+        }
+    }
 
     function guardar() {
         const datos = {
@@ -25,6 +46,7 @@ function FormularioPerfil({ perfil, onTerminar }) {
             nivelIngles: nivel,
             telefono: telefono.trim(),
             documento: documento.trim(),
+            foto,
         };
         const error = errorDePerfil(datos);
         if (error) {
@@ -32,7 +54,11 @@ function FormularioPerfil({ perfil, onTerminar }) {
             return;
         }
         guardarPerfil(datos);
-        Alert.alert('Perfil guardado', 'Ya puedes reservar tus clases.');
+        if (perfil) {
+            Alert.alert('Perfil actualizado', 'Tus datos quedaron al día.');
+        } else {
+            Alert.alert('Perfil guardado', 'Ya puedes reservar tus clases.');
+        }
         onTerminar();
     }
 
@@ -43,6 +69,11 @@ function FormularioPerfil({ perfil, onTerminar }) {
         >
             <ScrollView contentContainerStyle={styles.formulario} keyboardShouldPersistTaps="handled">
                 <Text style={styles.titulo}>{perfil ? 'Editar perfil' : 'Registra tu perfil'}</Text>
+
+                <Pressable onPress={elegirFoto} style={styles.fotoContenedor}>
+                    <AvatarPerfil uri={foto} nombre={nombre.trim()} apellido={apellido.trim()} size={96} />
+                    <Text style={styles.fotoTexto}>{foto ? 'Cambiar foto' : 'Elegir foto'}</Text>
+                </Pressable>
 
                 <Text style={styles.etiqueta}>Nombre</Text>
                 <TextInput
@@ -126,8 +157,8 @@ function FilaDato({ icono, titulo, valor }) {
 function VistaPerfil({ perfil, onEditar }) {
     return (
         <ScrollView contentContainerStyle={styles.vista}>
-            <View style={styles.avatar}>
-                <Ionicons name="person" size={36} color={colors.primario} />
+            <View style={styles.fotoVista}>
+                <AvatarPerfil uri={perfil.foto} nombre={perfil.nombre} apellido={perfil.apellido} size={96} />
             </View>
             <Text style={styles.nombreCompleto}>{perfil.nombre} {perfil.apellido}</Text>
             <FilaDato icono="school-outline" titulo="Nivel de inglés" valor={perfil.nivelIngles} />
@@ -194,15 +225,9 @@ const styles = StyleSheet.create({
     },
     botonSecundarioTexto: { color: colors.textoSuave, fontSize: 15, fontWeight: '700' },
     vista: { padding: spacing.lg, alignItems: 'stretch', backgroundColor: colors.fondo, flexGrow: 1 },
-    avatar: {
-        width: 72,
-        height: 72,
-        borderRadius: 36,
-        backgroundColor: colors.primarioSuave,
-        alignItems: 'center',
-        justifyContent: 'center',
-        alignSelf: 'center',
-    },
+    fotoVista: { alignSelf: 'center' },
+    fotoContenedor: { alignItems: 'center', marginBottom: spacing.xl },
+    fotoTexto: { fontSize: 13, fontWeight: '600', color: colors.primario, marginTop: spacing.sm },
     nombreCompleto: {
         fontSize: 20,
         fontWeight: '800',
