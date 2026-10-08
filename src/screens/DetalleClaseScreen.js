@@ -6,6 +6,7 @@ import useResponsive from "../hooks/useResponsive";
 import { colors, spacing, radius, typography, sombra } from '../theme/index.js';
 import { formatearPrecio } from '../data/clases';
 import useReserva from '../hooks/useReserva';
+import usePerfil from '../hooks/usePerfil';
 import LabelLevel from "../components/LabelLevel";
 
 export default function DetalleClase({ route, navigation }) {
@@ -13,13 +14,37 @@ export default function DetalleClase({ route, navigation }) {
     const { clase } = route.params;
     const { paddingHorizontal, isTablet } = useResponsive();
     const { cargando, reservas, agregarReserva } = useReserva();
+    const { completo, cargando: cargandoPerfil } = usePerfil();
     const [horarioElegido, setHorarioElegido] = useState(null);
 
-    const reservasDeLaClase = reservas.filter((r) => r.id.startsWith(clase.id + '-'));
+    const reservasDeLaClase = reservas.filter((r) => r.claseId === clase.id);
     const cuposDisponibles = clase.cupos - reservasDeLaClase.length;
     const horariosReservados = reservasDeLaClase.map((r) => r.horario);
-    const puedeReservar = !cargando && cuposDisponibles > 0 && horarioElegido !== null;
+    // El botón se deshabilita mientras carga, si no hay cupos, o si ya hay perfil y falta elegir horario.
+    // Sin perfil queda habilitado para llevar a la pestaña Perfil
+    const botonActivo = !cargando && !cargandoPerfil && cuposDisponibles > 0 && (!completo || horarioElegido !== null);
 
+    function manejarBoton() {
+        if (!completo) {
+            navigation.navigate('Perfil');
+        } else {
+            manejarReserva();
+        }
+    }
+
+    // Texto del botón, en el orden en que se revisa cada caso
+    function textoDelBoton() {
+        if (cuposDisponibles <= 0) {
+            return 'Sin cupos';
+        }
+        if (!completo) {
+            return 'Completa tu perfil';
+        }
+        if (horarioElegido === null) {
+            return 'Elige un horario';
+        }
+        return 'Reservar clase';
+    }
 
     function manejarReserva() {
         Alert.alert(
@@ -34,6 +59,8 @@ export default function DetalleClase({ route, navigation }) {
                         if (resultado.ok) {
                             setHorarioElegido(null);
                             Alert.alert('Reserva confirmada', 'Te esperamos en la clase.');
+                        } else if (resultado.motivo === 'sin-perfil') {
+                            Alert.alert('Falta tu perfil', 'Completa tu perfil para poder reservar.');
                         } else {
                             Alert.alert('Ya reservada', 'Ya tienes reservado ese horario.');
                         }
@@ -102,21 +129,15 @@ export default function DetalleClase({ route, navigation }) {
             <View style={[estilos.barra, { paddingHorizontal }]}>
                 <Text style={estilos.precio}>{formatearPrecio(clase.precio)}</Text>
                 <Pressable
-                    disabled={!puedeReservar}
-                    onPress={manejarReserva}
+                    disabled={!botonActivo}
+                    onPress={manejarBoton}
                     style={({ pressed }) => [
                         estilos.boton,
-                        !puedeReservar && estilos.botonDeshabilitado,
+                        !botonActivo && estilos.botonDeshabilitado,
                         pressed && { opacity: 0.7 },
                     ]}
                     >
-                    <Text style={estilos.botonTexto}>
-                        {cuposDisponibles <= 0
-                            ? 'Sin cupos'
-                            : horarioElegido === null
-                                ? 'Elige un horario'
-                                : 'Reservar clase'}
-                    </Text>
+                    <Text style={estilos.botonTexto}>{textoDelBoton()}</Text>
                 </Pressable>
 
             </View>

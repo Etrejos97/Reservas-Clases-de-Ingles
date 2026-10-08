@@ -8,7 +8,7 @@ import * as ImagePicker from 'expo-image-picker';
 import AvatarPerfil from '../components/AvatarPerfil';
 import LevelChip from '../components/LevelChip';
 import usePerfil from '../hooks/usePerfil';
-import { errorDePerfil } from '../utils/validarPerfil';
+import { errorDePerfil, perfilValido } from '../utils/validarPerfil';
 import { NIVELES_INGLES } from '../data/nivelesIngles';
 import { colors, spacing, radius } from '../theme';
 
@@ -20,6 +20,8 @@ function FormularioPerfil({ perfil, onTerminar }) {
     const [telefono, setTelefono] = useState(perfil ? perfil.telefono : '');
     const [documento, setDocumento] = useState(perfil ? perfil.documento : '');
     const [foto, setFoto] = useState((perfil && perfil.foto) || '');
+    // El documento solo se bloquea cuando el perfil guardado ya es válido
+    const documentoBloqueado = perfilValido(perfil);
 
     async function elegirFoto() {
         try {
@@ -115,12 +117,18 @@ function FormularioPerfil({ perfil, onTerminar }) {
                 />
 
                 <Text style={styles.etiqueta}>Documento</Text>
+                <Text style={styles.ayuda}>
+                    {documentoBloqueado
+                        ? 'El documento no se puede cambiar después de registrarlo.'
+                        : 'Revísalo bien: después no podrás cambiarlo.'}
+                </Text>
                 <TextInput
-                    style={styles.input}
+                    style={[styles.input, documentoBloqueado && styles.inputBloqueado]}
                     value={documento}
                     onChangeText={setDocumento}
                     placeholder="Ej: 1020304050"
                     keyboardType="number-pad"
+                    editable={!documentoBloqueado}
                 />
 
                 <Pressable
@@ -208,6 +216,8 @@ const styles = StyleSheet.create({
         color: colors.texto,
         marginBottom: spacing.lg,
     },
+    inputBloqueado: { backgroundColor: colors.borde, color: colors.textoSuave },
+    ayuda: { fontSize: 12, color: colors.textoSuave, marginBottom: spacing.xs },
     niveles: { flexGrow: 0, marginBottom: spacing.lg },
     boton: {
         backgroundColor: colors.primario,
