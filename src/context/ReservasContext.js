@@ -52,10 +52,15 @@ export function ReservasProvider({children}) {
         return {ok: true};
     },[reservas, setReservas, perfil]);
 
+    // Vacía la lista de reservas que la app tiene en memoria (y lo guardado), se usa al borrar los datos
+    const borrarReservas = useCallback(() => {
+        setReservas([]);
+    },[setReservas]);
+
     const valor = useMemo(
         () =>(
-            {cargando, reservas, misReservas, agregarReserva, cancelarReserva}),
-        [cargando, reservas, misReservas, agregarReserva, cancelarReserva]
+            {cargando, reservas, misReservas, agregarReserva, cancelarReserva, borrarReservas}),
+        [cargando, reservas, misReservas, agregarReserva, cancelarReserva, borrarReservas]
         );
     return <ReservasContext.Provider value={valor}>{children}</ReservasContext.Provider>
 

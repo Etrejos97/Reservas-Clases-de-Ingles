@@ -23,3 +23,36 @@ export const getData = async (key) => {
         return null;
     }
 };
+
+// Eliminar UNA llave
+export const removeData = async (key) => {
+    try {
+        await AsyncStorage.removeItem(key);
+        return true;
+    } catch (error) {
+        console.log('Error eliminando:', error);
+        return false;
+    }
+};
+
+// Borrar TODO el almacenamiento de la app
+export const clearAll = async () => {
+    try {
+        await AsyncStorage.clear();
+        return true;
+    } catch (error) {
+        console.log('Error limpiando:', error);
+        return false;
+    }
+};
+
+// Ver TODO lo guardado tal cual, como texto: [['@llave', 'valor'], ...]
+export const getAllRaw = async () => {
+    try {
+        const keys = await AsyncStorage.getAllKeys();
+        return await AsyncStorage.multiGet(keys);
+    } catch (error) {
+        console.log('Error leyendo todo:', error);
+        return [];
+    }
+};

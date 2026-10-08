@@ -1,13 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-    View, Text, TextInput, Pressable, ScrollView,
+    View, Text, TextInput, Pressable, ScrollView, ActivityIndicator,
     KeyboardAvoidingView, Platform, Alert, StyleSheet,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import AvatarPerfil from '../components/AvatarPerfil';
+import DebugBox from '../components/DebugBox';
 import LevelChip from '../components/LevelChip';
 import usePerfil from '../hooks/usePerfil';
+import useReserva from '../hooks/useReserva';
+import { removeData, getAllRaw } from '../services/storage';
+import { STORAGE_KEYS } from '../constants/storageKeys';
 import { errorDePerfil, perfilValido } from '../utils/validarPerfil';
 import { NIVELES_INGLES } from '../data/nivelesIngles';
 import { colors, spacing, radius } from '../theme';
@@ -163,6 +167,39 @@ function FilaDato({ icono, titulo, valor }) {
 }
 
 function VistaPerfil({ perfil, onEditar }) {
+    const { guardarPerfil } = usePerfil();
+    const { reservas, borrarReservas } = useReserva();
+    const [entradas, setEntradas] = useState([]);
+
+    // Cada vez que cambia el perfil o las reservas, vuelvo a leer lo que hay guardado
+    useEffect(() => {
+        const leer = async () => {
+            setEntradas(await getAllRaw());
+        };
+        leer();
+    }, [perfil, reservas]);
+
+    function confirmarBorrado() {
+        Alert.alert(
+            'Borrar mis datos',
+            '¿Seguro que quieres borrar tu perfil y tus reservas? No se puede deshacer.',
+            [
+                { text: 'Cancelar', style: 'cancel' },
+                {
+                    text: 'Borrar',
+                    style: 'destructive',
+                    onPress: async () => {
+                        // Borro solo las dos llaves de mi app, y luego vacío lo que la app tiene en memoria
+                        await removeData(STORAGE_KEYS.PERFIL);
+                        await removeData(STORAGE_KEYS.RESERVAS);
+                        guardarPerfil(null);
+                        borrarReservas();
+                    },
+                },
+            ]
+        );
+    }
+
     return (
         <ScrollView contentContainerStyle={styles.vista}>
             <View style={styles.fotoVista}>
@@ -178,6 +215,14 @@ function VistaPerfil({ perfil, onEditar }) {
             >
                 <Text style={styles.botonTexto}>Editar</Text>
             </Pressable>
+            <Pressable
+                onPress={confirmarBorrado}
+                style={({ pressed }) => [styles.botonBorrar, pressed && { opacity: 0.7 }]}
+            >
+                <Ionicons name="trash-outline" size={16} color={colors.peligro} />
+                <Text style={styles.botonBorrarTexto}>Borrar mis datos</Text>
+            </Pressable>
+            {__DEV__ && <DebugBox entradas={entradas} />}
         </ScrollView>
     );
 }
@@ -189,7 +234,8 @@ export default function PerfilScreen() {
     if (cargando) {
         return (
             <View style={styles.centro}>
-                <Text style={styles.filaTitulo}>Cargando...</Text>
+                <ActivityIndicator color={colors.primario} />
+                <Text style={[styles.filaTitulo, { marginTop: spacing.sm }]}>Cargando...</Text>
             </View>
         );
     }
@@ -234,6 +280,18 @@ const styles = StyleSheet.create({
         marginTop: spacing.sm,
     },
     botonSecundarioTexto: { color: colors.textoSuave, fontSize: 15, fontWeight: '700' },
+    botonBorrar: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: spacing.sm,
+        borderRadius: radius.md,
+        borderWidth: 1,
+        borderColor: colors.peligro,
+        paddingVertical: spacing.md,
+        marginTop: spacing.md,
+    },
+    botonBorrarTexto: { color: colors.peligro, fontSize: 15, fontWeight: '700' },
     vista: { padding: spacing.lg, alignItems: 'stretch', backgroundColor: colors.fondo, flexGrow: 1 },
     fotoVista: { alignSelf: 'center' },
     fotoContenedor: { alignItems: 'center', marginBottom: spacing.xl },

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, FlatList, Alert, StyleSheet } from 'react-native';
+import { View, Text, FlatList, Alert, ActivityIndicator, StyleSheet } from 'react-native';
 import EstadoVacio from '../components/EstadoVacio';
 import ReservaItem from '../components/ReservaItem';
 import useReserva from '../hooks/useReserva';
@@ -30,6 +30,7 @@ export default function ReservasScreen({ navigation }) {
     if (cargando || cargandoPerfil) {
         return (
             <View style={styles.centro}>
+                <ActivityIndicator color={colors.primario} />
                 <Text style={styles.cargando}>Cargando...</Text>
             </View>
         );
@@ -93,7 +94,7 @@ export default function ReservasScreen({ navigation }) {
 const styles = StyleSheet.create({
     pantalla: { flex: 1, backgroundColor: colors.fondo },
     centro: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.fondo },
-    cargando: { fontSize: 13, color: colors.textoSuave },
+    cargando: { fontSize: 13, color: colors.textoSuave, marginTop: spacing.sm },
     lista: { padding: spacing.lg },
     barraTotal: {
         flexDirection: 'row',
