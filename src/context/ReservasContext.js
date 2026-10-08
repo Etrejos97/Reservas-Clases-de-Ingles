@@ -2,6 +2,7 @@ import React, {useCallback, useMemo, createContext} from 'react';
 import useAlmacenamiento from '../hooks/useAlmacenamiento';
 import { STORAGE_KEYS } from '../constants/storageKeys';
 import usePerfil from '../hooks/usePerfil';
+import { esDeLaPersona } from '../utils/reservas';
 
 export const ReservasContext = createContext(null);
 
@@ -34,9 +35,27 @@ export function ReservasProvider({children}) {
         setReservas([nueva, ...reservas]);
         return {ok: true};
     },[reservas, setReservas, perfil, completo]);
+
+    // reservas tiene todas las reservas (sirve para los cupos), misReservas solo las de la persona
+    const misReservas = useMemo(
+        () => reservas.filter((r) => esDeLaPersona(r, perfil)),
+        [reservas, perfil]
+    );
+
+    const cancelarReserva = useCallback((id) => {
+        const reserva = reservas.find((r) => r.id === id);
+        if (!reserva || !esDeLaPersona(reserva, perfil)) {
+            return {ok: false};
+        }
+        // Se filtra la lista completa, para no borrar del teléfono las reservas de otras personas
+        setReservas(reservas.filter((r) => r.id !== id));
+        return {ok: true};
+    },[reservas, setReservas, perfil]);
+
     const valor = useMemo(
         () =>(
-            {cargando, reservas, agregarReserva}),[cargando, reservas, agregarReserva]
+            {cargando, reservas, misReservas, agregarReserva, cancelarReserva}),
+        [cargando, reservas, misReservas, agregarReserva, cancelarReserva]
         );
     return <ReservasContext.Provider value={valor}>{children}</ReservasContext.Provider>
 
