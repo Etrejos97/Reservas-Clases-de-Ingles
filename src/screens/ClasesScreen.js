@@ -54,7 +54,7 @@ export default function ClasesScreen({navigation}) {
                 }
             </View>
             <ScrollView
-                style={{flexGrow: 0}}
+                style={{flexGrow: 0, marginBottom: spacing.lg}}
                 horizontal
             >
                 {

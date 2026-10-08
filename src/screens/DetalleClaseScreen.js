@@ -1,16 +1,13 @@
-import react, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Alert, Image, Pressable } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useResponsive from "../hooks/useResponsive";
-import { colors, spacing, radius, typography, sombra } from '../theme/index.js';
+import { colors, spacing, radius, typography } from '../theme/index.js';
 import { formatearPrecio } from '../data/clases';
 import useReserva from '../hooks/useReserva';
 import usePerfil from '../hooks/usePerfil';
 import LabelLevel from "../components/LabelLevel";
 
 export default function DetalleClase({ route, navigation }) {
-    const insets = useSafeAreaInsets();
     const { clase } = route.params;
     const { paddingHorizontal, isTablet } = useResponsive();
     const { cargando, reservas, agregarReserva } = useReserva();
@@ -80,7 +77,7 @@ export default function DetalleClase({ route, navigation }) {
                     resizeMode="cover"
                     style={[estilos.portada, { height: isTablet ? 400 : 200 }]}
                 />
-                <View style={{ paddingHorizontal, gap: spacing.lg }}>
+                <View style={{ paddingHorizontal, paddingTop: spacing.lg, gap: spacing.lg }}>
                     <LabelLevel level={clase.nivel} />
                     <Text style={estilos.descripcion}>{clase.descripcion}</Text>
                     <View style={estilos.profesor}>
